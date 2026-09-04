@@ -84,12 +84,19 @@ get_pio_envs_containing_string() {
   done
 }
 
+# ponytail: this repo only ships firmware for T-Deck + Meshnology W12, so CI
+# has no business compiling the ~80 other upstream board variants. All CI
+# target discovery (build_all_firmwares_by_suffix and get-*-firmwares-to-build)
+# routes through this function, so filtering here scopes everything at once.
+# Widen if we ever add another supported board.
+BOARD_ALLOWLIST_REGEX='^(LilyGo_TDeck|meshnology_w12)'
+
 # $1 should be the string to find (case insensitive)
 get_pio_envs_ending_with_string() {
   shopt -s nocasematch
   envs=($(get_pio_envs))
   for env in "${envs[@]}"; do
-    if [[ "$env" == *${1} ]]; then
+    if [[ "$env" == *${1} ]] && [[ "$env" =~ $BOARD_ALLOWLIST_REGEX ]]; then
       echo $env
     fi
   done
